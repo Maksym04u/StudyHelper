@@ -1,0 +1,21 @@
+@model StudyApp.Models.GradeModel
+
+@{
+    ViewData["Title"] = "Видалити оцінку";
+}
+
+<h2>Ви впевнені, що хочете видалити цю оцінку?</h2>
+
+<div>
+    <strong>Предмет:</strong> @Model.Subject
+    <br />
+    <strong>Оцінка:</strong> @Model.Grade
+    <br />
+    <strong>Дата:</strong> @Model.Date.ToShortDateString()
+</div>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Так, видалити</button>
+    <a href="@Url.Action("Index", "Grade")" class="btn btn-secondary">Скасувати</a>
+</form>

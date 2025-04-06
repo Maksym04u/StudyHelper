@@ -1,0 +1,99 @@
+@model RegisterViewModel
+
+<style>
+    .auth-container {
+        max-width: 400px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 4px solid #4e73df;
+    }
+
+    .auth-input {
+        width: 100%;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+    }
+
+    .auth-input:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.25);
+    }
+
+    .auth-btn {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #4e73df;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .auth-btn:hover {
+        background-color: #2e59d9;
+        transform: translateY(-1px);
+    }
+
+    .auth-footer {
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    .text-error {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: -0.25rem;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    .text-error li {
+        margin-bottom: 0.25rem;
+    }
+</style>
+
+<div class="auth-container">
+    <h2>Реєстрація</h2>
+
+    <!-- Глобальні повідомлення про помилки -->
+    @if (ViewData.ModelState.ErrorCount > 0)
+    {
+        <ul class="text-error">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    }
+
+    <form asp-action="Register" method="post">
+        <input class="auth-input" asp-for="FullName" placeholder="Ім'я" />
+        <span asp-validation-for="FullName" class="text-error"></span>
+
+        <input class="auth-input" asp-for="Email" placeholder="Email" />
+        <span asp-validation-for="Email" class="text-error"></span>
+
+        <input class="auth-input" asp-for="Password" placeholder="Пароль (мінімум 6 символів)" type="password" />
+        <span asp-validation-for="Password" class="text-error"></span>
+
+        <input class="auth-input" asp-for="ConfirmPassword" placeholder="Підтвердіть пароль" type="password" />
+        <span asp-validation-for="ConfirmPassword" class="text-error"></span>
+        
+        <button class="auth-btn" type="submit">Зареєструватися</button>
+    </form>
+    
+    <div class="auth-footer">
+        <p>Вже маєте акаунт? <a asp-action="Login">Увійти</a></p>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

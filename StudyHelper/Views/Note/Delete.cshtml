@@ -1,0 +1,33 @@
+@model StudyApp.Models.NoteModel
+
+@{
+    ViewData["Title"] = "Видалити нотатку";
+}
+
+<div class="container">
+    <h1>@ViewData["Title"]</h1>
+
+    <h3>Ви впевнені, що хочете видалити цю нотатку?</h3>
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">@Html.DisplayFor(model => model.Title)</h5>
+            <p class="card-text">@Html.DisplayFor(model => model.Note)</p>
+            <p class="card-text">
+                <small class="text-muted">
+                    Створено: @Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")
+                    @if (Model.LastModifiedDate.HasValue)
+                    {
+                        <span> | Змінено: @Model.LastModifiedDate.Value.ToString("dd.MM.yyyy HH:mm")</span>
+                    }
+                </small>
+            </p>
+            
+            <form asp-action="Delete">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <input type="submit" value="Видалити" class="btn btn-danger" />
+                <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
+            </form>
+        </div>
+    </div>
+</div>

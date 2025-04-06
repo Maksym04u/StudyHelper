@@ -1,0 +1,24 @@
+@model StudyApp.Models.TaskModel
+
+@{
+    ViewData["Title"] = "Видалити завдання";
+}
+
+<div class="container">
+    <h1>@ViewData["Title"]</h1>
+
+    <h3>Ви впевнені, що хочете видалити це завдання?</h3>
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">@Html.DisplayFor(model => model.Title)</h5>
+            <p class="card-text">@Html.DisplayFor(model => model.Description)</p>
+            <p class="card-text"><small class="text-muted">До @Html.DisplayFor(model => model.Deadline)</small></p>
+            
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="Id" />
+                <input type="submit" value="Видалити" class="btn btn-danger" />
+                <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
+            </form>
+        </div>
+    </div>
+</div>

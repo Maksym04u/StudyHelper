@@ -1,0 +1,213 @@
+
+
+@model StudyApp.Models.Study
+@using Microsoft.AspNetCore.Hosting
+@inject IWebHostEnvironment Environment
+
+@{
+    ViewData["Title"] = "Редагувати конспект";
+    var uploadsPath = $"{Environment.WebRootPath}/uploads";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-warning text-dark">
+            <h4><i class="fas fa-edit me-2"></i>@ViewData["Title"]</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label fw-bold"></label>
+                    <input asp-for="Title" class="form-control" required />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Category" class="form-label fw-bold"></label>
+                    <select asp-for="Category" class="form-select" required>
+                        <option value="">Оберіть категорію</option>
+                        <option value="Лекції">Лекції</option>
+                        <option value="Лабораторні">Лабораторні</option>
+                        <option value="Практичні">Практичні</option>
+                    </select>
+                    <span asp-validation-for="Category" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Tags" class="form-label fw-bold"></label>
+                    <input asp-for="Tags" class="form-control" placeholder="Наприклад: математика, алгебра" />
+                    <span asp-validation-for="Tags" class="text-danger small"></span>
+                </div>
+
+<div class="mb-4">
+    <label class="form-label fw-bold">Додати нові файли</label>
+    <input type="file" name="newFiles" multiple class="form-control" 
+           accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" />
+    <small class="text-muted">Можна вибрати кілька файлів</small>
+</div>
+
+                @if (Model.Files != null && Model.Files.Any())
+                {
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Поточні файли</label>
+                        <div class="list-group">
+                            @foreach (var file in Model.Files)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="@GetFileIcon(file.FileType) me-2"></i>
+                                        <a href="@file.StoragePath" target="_blank" class="text-decoration-none">
+                                            @file.OriginalName
+                                        </a>
+                                        <small class="text-muted ms-2">(@FormatFileSize(file.FileSize))</small>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger delete-file" 
+                                            data-file-id="@file.Id" data-study-id="@Model.Id">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a asp-action="Index" class="btn btn-outline-secondary me-md-2">
+                        <i class="fas fa-arrow-left me-1"></i> Назад
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Зберегти зміни
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script>
+            $(document).ready(function() {
+                // Обробка видалення файлів
+                $('.delete-file').click(function() {
+                    if (confirm('Ви впевнені, що хочете видалити цей файл?')) {
+                        const fileId = $(this).data('file-id');
+                        const studyId = $(this).data('study-id');
+                        
+                        $.post('@Url.Action("DeleteFile", "Study")', { 
+                            id: fileId, 
+                            studyId: studyId 
+                        }, function() {
+                            location.reload();
+                        });
+                    }
+                });
+
+                // Обробка відправки форми
+                $('#editForm').on('submit', function(e) {
+                    e.preventDefault();
+                    
+                    if (!this.checkValidity()) {
+                        e.stopPropagation();
+                        $(this).addClass('was-validated');
+                        return;
+                    }
+
+                    $('#submitBtn').prop('disabled', true);
+                    
+                    // Додаємо індикатор завантаження
+                    $('#submitBtn').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Збереження...');
+
+                    // Відправляємо форму через AJAX
+                    $.ajax({
+                        url: $(this).attr('action'),
+                        type: 'POST',
+                        data: new FormData(this),
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            if (response.redirect) {
+                                window.location.href = response.redirect;
+                            }
+                        },
+                        error: function(xhr) {
+                            alert('Сталася помилка: ' + xhr.responseText);
+                            $('#submitBtn').prop('disabled', false).html('<i class="fas fa-save me-1"></i> Зберегти зміни');
+                        },
+                        complete: function() {
+                            $('#submitBtn').prop('disabled', false).html('<i class="fas fa-save me-1"></i> Зберегти зміни');
+                        }
+                    });
+                });
+            });
+        </script>
+    
+@* @section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script>
+            $(document).ready(function() {
+                $('.delete-file').click(function() {
+                    if (confirm('Ви впевнені, що хочете видалити цей файл?')) {
+                        const fileId = $(this).data('file-id');
+                        const studyId = $(this).data('study-id');
+                        
+                        $.post('@Url.Action("DeleteFile", "Study")', { 
+                            id: fileId, 
+                            studyId: studyId 
+                        }, function() {
+                            location.reload();
+                        });
+                    }
+                });
+            });
+
+            // Додаткова валідація форми
+            (function () {
+                'use strict'
+                const forms = document.querySelectorAll('.needs-validation')
+                Array.from(forms).forEach(form => {
+                    form.addEventListener('submit', event => {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+            })()
+        </script> *@
+    }
+}
+
+@functions {
+    string GetFileIcon(string fileType)
+    {
+        return fileType?.ToLower() switch
+        {
+            ".pdf" => "fas fa-file-pdf text-danger",
+            ".docx" or ".doc" => "fas fa-file-word text-primary",
+            ".xlsx" or ".xls" => "fas fa-file-excel text-success",
+            ".jpg" or ".jpeg" or ".png" => "fas fa-file-image text-info",
+            ".zip" or ".rar" => "fas fa-file-archive text-warning",
+            _ => "fas fa-file text-secondary"
+        };
+    }
+
+    string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        int order = 0;
+        while (bytes >= 1024 && order < sizes.Length - 1) {
+            order++;
+            bytes /= 1024;
+        }
+        return $"{bytes:0.##} {sizes[order]}";
+    }
+}

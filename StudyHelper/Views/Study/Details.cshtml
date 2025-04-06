@@ -1,0 +1,107 @@
+@model StudyApp.Models.Study
+@using System.IO
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>@Model.Title</h2>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-edit"></i> Редагувати
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="#files">Файли</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#info">Інформація</a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="card-body tab-content">
+            <div class="tab-pane fade show active" id="files">
+                @if (Model.Files.Any())
+                {
+                    <table class="table table-hover">
+                        <tbody>
+                            @foreach (var file in Model.Files)
+                            {
+                                <tr>
+                                    <td style="width: 40px;">
+                                        <i class="fas @(GetFileIcon(file.FileType)) text-primary"></i>
+                                    </td>
+                                    <td>
+                                        <a href="@file.StoragePath" download="@file.OriginalName">
+                                            @file.OriginalName
+                                        </a>
+                                        @if (!string.IsNullOrEmpty(file.Description))
+                                        {
+                                            <div class="text-muted small">@file.Description</div>
+                                        }
+                                    </td>
+                                    <td class="text-right">
+                                        <small class="text-muted">@FormatFileSize(file.FileSize)</small>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="alert alert-info">Немає доданих файлів</div>
+                }
+            </div>
+            
+            <div class="tab-pane fade" id="info">
+                <dl class="row">
+                    <dt class="col-sm-3">Категорія:</dt>
+                    <dd class="col-sm-9">@Model.Category</dd>
+                    
+                    <dt class="col-sm-3">Створено:</dt>
+                    <dd class="col-sm-9">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Назад до списку
+    </a>
+</div>
+
+@functions {
+    public string GetFileIcon(string fileType)
+    {
+        return fileType switch
+        {
+            ".pdf" => "fa-file-pdf",
+            ".docx" or ".doc" => "fa-file-word",
+            ".xlsx" or ".xls" => "fa-file-excel",
+            ".jpg" or ".png" or ".gif" => "fa-file-image",
+            ".zip" or ".rar" => "fa-file-archive",
+            _ => "fa-file"
+        };
+    }
+    
+    public string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        int order = 0;
+        while (bytes >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            bytes /= 1024;
+        }
+        return $"{bytes:0.##} {sizes[order]}";
+    }
+}

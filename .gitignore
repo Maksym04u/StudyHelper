@@ -1,0 +1,81 @@
+# Build results
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider project settings
+.idea/
+
+# VS Code settings
+.vscode/
+
+# ASP.NET runtime files
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# IIS Express
+.vs/
+*.vspscc
+*.vssscc
+
+# Web publish
+publish/
+*.Publish.xml
+
+# Logs
+*.log
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+project.lock.json
+project.fragment.lock.json
+
+# Entity Framework migrations snapshot
+**/Migrations/*Snapshot.cs
+
+# Coverage and test results
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Compiled Razor views
+**/obj/**/Razor/
+
+# wwwroot auto-generated content
+wwwroot/lib/
+wwwroot/dist/
+wwwroot/node_modules/
+
+
+# Node modules (if using frontend tools like React, Vue, or Tailwind via npm)
+node_modules/
+npm-debug.log
+yarn.lock
+package-lock.json
+
+# Environment configs (if you're using secrets in development)
+.env
+.env.*
+
+# JetBrains Rider and other IDEs
+.idea/
+
+# Mac system files
+.DS_Store

@@ -1,0 +1,84 @@
+﻿:root {
+  --dark-primary: #0d1b2a;
+  --dark-secondary: #1b263b;
+  --dark-accent: #415a77;
+  --dark-text: #e0e1dd;
+  --dark-highlight: #778da9;
+}
+
+body {
+  background-color: var(--dark-secondary);
+  color: var(--dark-text);
+}
+
+a.navbar-brand {
+  white-space: normal;
+  text-align: center;
+  word-break: break-all;
+  color: var(--dark-highlight) !important;
+}
+
+a {
+  color: var(--dark-highlight);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--dark-text);
+}
+
+.btn-primary {
+  color: var(--dark-text);
+  background-color: var(--dark-accent);
+  border-color: var(--dark-primary);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--dark-primary);
+  border-color: var(--dark-highlight);
+}
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+  color: var(--dark-text);
+  background-color: var(--dark-accent);
+  border-color: var(--dark-primary);
+}
+
+.border-top {
+  border-top: 1px solid var(--dark-accent);
+}
+.border-bottom {
+  border-bottom: 1px solid var(--dark-accent);
+}
+
+.box-shadow {
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .15);
+}
+
+button.accept-policy {
+  font-size: 1rem;
+  line-height: inherit;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px;
+  background-color: var(--dark-primary);
+  color: var(--dark-text);
+}
+
+.navbar {
+  background-color: var(--dark-primary) !important;
+  border-bottom: 1px solid var(--dark-accent);
+}
+
+.card {
+  background-color: var(--dark-primary);
+  border: 1px solid var(--dark-accent);
+  color: var(--dark-text);
+}

@@ -1,0 +1,133 @@
+﻿
+@using StudyApp.Models
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<User> SignInManager
+
+@{
+    ViewData["Title"] = "Головна";
+}
+
+<div class="home-container">
+    <div class="welcome-section text-center">
+        <h1 class="display-4 mb-4">Вітаємо у StudyApp</h1>
+    </div>
+
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <div class="user-section text-center mb-5">
+
+            <a href="@Url.Action("Logout", "Account")" class="btn btn-danger btn-lg">
+                <i class="bi bi-box-arrow-right"></i> Вийти
+            </a>
+        </div>
+    }
+
+    <div class="features-section">
+        <div class="row justify-content-center">
+            <div class="col-md-4 mb-4">
+                <div class="feature-card card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-dark">Завдання</h5>
+                        <p class="card-text text-secondary">Керуйте своїми навчальними завданнями та дедлайнами</p>
+                        <a href="@Url.Action("Tasks", "Home")" class="btn btn-primary">
+                            <i class="bi bi-list-task"></i> Перейти
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="feature-card card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-dark">Оцінки</h5>
+                        <p class="card-text text-secondary">Відстежуйте свої академічні досягнення</p>
+                        <a href="@Url.Action("Grades", "Home")" class="btn btn-primary">
+                            <i class="bi bi-journal-bookmark"></i> Перейти
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="feature-card card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-dark">Нотатки</h5>
+                        <p class="card-text text-secondary">Зберігайте важливу навчальну інформацію</p>
+                        <a href="@Url.Action("Notes", "Home")" class="btn btn-primary">
+                            <i class="bi bi-journal-text"></i> Перейти
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!SignInManager.IsSignedIn(User))
+    {
+        <div class="auth-section text-center mt-5">
+            <h4 class="mb-3 text-dark">Почати роботу</h4>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="@Url.Action("Register", "Account")" class="btn btn-success btn-lg px-4">
+                    <i class="bi bi-person-plus"></i> Реєстрація
+                </a>
+                <a href="@Url.Action("Login", "Account")" class="btn btn-primary btn-lg px-4">
+                    <i class="bi bi-box-arrow-in-right"></i> Вхід
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .home-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .welcome-section {
+        margin-bottom: 3rem;
+    }
+    
+    .feature-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid #4e73df;
+        background-color: #f8f9fa;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .feature-card .card-body {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .feature-card .btn {
+        margin-top: auto;
+        align-self: flex-start;
+    }
+    
+    .user-info {
+        font-size: 1.1rem;
+    }
+    .text-dark {
+        color: #343e40 !important;
+    }
+    
+    .text-secondary {
+        color: #5b6269 !important;
+    }
+    
+    .btn-lg {
+        padding: 0.5rem 1.5rem;
+        font-size: 1.1rem;
+        border-radius: 0.3rem;
+    }
+    
+    .bi {
+        margin-right: 8px;
+    }
+</style>

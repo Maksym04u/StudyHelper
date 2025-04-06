@@ -1,0 +1,110 @@
+@model IEnumerable<StudyApp.Models.TaskModel>
+
+@{
+    ViewData["Title"] = "Мої завдання";
+}
+
+<style>
+    .task-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid #6c757d;
+    }
+    
+    .task-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .task-card.completed {
+        border-left-color: #28a745;
+        background-color: #f8f9fa;
+    }
+    
+    .task-title.completed {
+        text-decoration: line-through;
+    }
+    
+    .task-actions .btn {
+        min-width: 40px;
+    }
+    
+    .task-badge {
+        font-size: 0.8rem;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>@ViewData["Title"]</h1>
+        <a asp-controller="Task" asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-1"></i> Додати завдання
+        </a>
+    </div>
+
+    <div class="task-list">
+        @foreach (var task in Model)
+        {
+            <div class="card mb-3 task-card @(task.IsCompleted ? "completed" : "")">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center mb-2">
+                                <h5 class="mb-0 task-title @(task.IsCompleted ? "completed" : "")">
+                                    @task.Title
+                                </h5>
+                                <span class="badge task-badge ms-2 @(task.IsCompleted ? "bg-success" : "bg-warning")">
+                                    @(task.IsCompleted ? "Виконано" : "В роботі")
+                                </span>
+                            </div>
+                            
+                            @if (!string.IsNullOrEmpty(task.Description))
+                            {
+                                <p class="text-muted mb-2">@task.Description</p>
+                            }
+                            
+                            <div class="d-flex align-items-center">
+                                <i class="far fa-clock text-muted me-1"></i>
+                                <small class="text-muted">
+                                    @task.Deadline.ToString("dd.MM.yyyy HH:mm")
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="task-actions d-flex flex-column flex-md-row">
+                            @if (!task.IsCompleted)
+                            {
+                                <form asp-controller="Task" asp-action="MarkCompleted" method="post" class="me-2">
+                                    <input type="hidden" name="id" value="@task.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-success mb-2 mb-md-0">
+                                        <i class="fas fa-check"></i> Готово
+                                    </button>
+                                </form>
+                            }
+                            
+                            <a asp-controller="Task" asp-action="Edit" asp-route-id="@task.Id" 
+                            
+                               class="btn btn-sm btn-outline-primary mb-2 mb-md-0 me-md-2">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            
+                            <form asp-controller="Task" asp-action="Delete" method="post" class="d-inline">
+                                <input type="hidden" name="id" value="@task.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Видалити це завдання?')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> У вас ще немає завдань. Додайте перше!
+            </div>
+        }
+    </div>
+</div>

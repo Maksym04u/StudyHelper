@@ -1,0 +1,85 @@
+@using Microsoft.AspNetCore.Identity
+@using StudyApp.Models
+@inject UserManager<User> UserManager
+@model StudyApp.Models.ViewModels.StudyUploadViewModel
+
+@{
+    ViewData["Title"] = "Створити конспект";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+                <i class="fas fa-book me-2"></i>@ViewData["Title"]
+            </h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label fw-bold"></label>
+                    <input asp-for="Title" class="form-control" required />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="Category" class="form-label fw-bold"></label>
+                    <select asp-for="Category" class="form-select" required>
+                        <option value="" disabled selected>Оберіть категорію</option>
+                        <option value="Лекції">Лекції</option>
+                        <option value="Лабораторні">Лабораторні</option>
+                        <option value="Практичні">Практичні</option>
+                    </select>
+                    <span asp-validation-for="Category" class="text-danger small"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="Tags" class="form-label fw-bold"></label>
+                    <input asp-for="Tags" class="form-control" placeholder="Наприклад: математика, алгебра, геометрія" />
+                    <div class="form-text">Розділяйте теги комами</div>
+                    <span asp-validation-for="Tags" class="text-danger small"></span>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Файли конспекту</label>
+                    <input type="file" name="files" multiple class="form-control" 
+                           accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.ppt,.pptx" />
+                    <div class="form-text">Можна вибрати декілька файлів</div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a asp-action="Index" class="btn btn-outline-secondary me-md-2">
+                        <i class="fas fa-arrow-left me-1"></i> Скасувати
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-1"></i> Зберегти конспект
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script>
+            // Додаткова клієнтська валідація
+            (function () {
+                'use strict'
+                const forms = document.querySelectorAll('.needs-validation')
+                Array.from(forms).forEach(form => {
+                    form.addEventListener('submit', event => {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+            })()
+        </script>
+    }
+}

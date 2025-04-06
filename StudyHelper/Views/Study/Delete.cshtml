@@ -1,0 +1,48 @@
+@using System.IO
+@model StudyApp.Models.Study
+
+@{
+    ViewData["Title"] = "Видалити конспект";
+}
+
+<div class="container">
+    <h2>@ViewData["Title"]</h2>
+    <h3>Ви впевнені, що хочете видалити це?</h3>
+    
+    <div class="card border-danger mb-4">
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">@Model.Title</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Категорія:</dt>
+                <dd class="col-sm-9">@Model.Category</dd>
+                
+                <dt class="col-sm-3">Файлів:</dt>
+                <dd class="col-sm-9">@Model.Files.Count</dd>
+                
+                <dt class="col-sm-3">Створено:</dt>
+                <dd class="col-sm-9">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+            </dl>
+            
+            @if (Model.Files.Any())
+            {
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> Увага! Будуть видалені всі прикріплені файли (@Model.Files.Count шт.)
+                </div>
+            }
+        </div>
+    </div>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <div class="form-group">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash-alt"></i> Видалити
+            </button>
+            <a asp-action="Index" class="btn btn-outline-secondary ml-2">
+                <i class="fas fa-arrow-left"></i> Скасувати
+            </a>
+        </div>
+    </form>
+</div>
