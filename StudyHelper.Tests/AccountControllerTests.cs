@@ -84,7 +84,7 @@ namespace StudyHelper.Tests
         }
 
         [Fact]
-        public void GetUsers_Returns_List_Of_Users_With_Real_UserManager()
+        public void GetUsers_List()
         {
             // Arrange
             var testUsers = new List<User>
@@ -109,7 +109,7 @@ namespace StudyHelper.Tests
         }
 
         [Fact]
-        public void Register_GET_Returns_View()
+        public void Register_GET_Users()
         {
             // Arrange
             var testUsers = new List<User>().AsQueryable();
@@ -126,8 +126,13 @@ namespace StudyHelper.Tests
             Assert.IsType<ViewResult>(result);
         }
 
-        [Fact]
-        public async Task Register_POST_With_Valid_Model_Creates_User_And_Redirects()
+        [Theory]
+        [InlineData("Test User", "test@example.com", "Test123!", "Test123!", true)] // Valid case
+        [InlineData("", "test@example.com", "Test123!", "Test123!", false)] // Empty name
+        [InlineData("Test User", "invalid-email", "Test123!", "Test123!", false)] // Invalid email
+        [InlineData("Test User", "test@example.com", "123", "123", false)] // Too short password
+        [InlineData("Test User", "test@example.com", "Test123!", "Different123!", false)] // Mismatched passwords
+        public async Task Register_POST_Users(string fullName, string email, string password, string confirmPassword, bool shouldSucceed)
         {
             // Arrange
             var testUsers = new List<User>().AsQueryable();
@@ -138,51 +143,37 @@ namespace StudyHelper.Tests
             var controller = new AccountController(realUserManager, mockSignInManager, mockDbContext);
             var model = new RegisterViewModel
             {
-                FullName = "Test User",
-                Email = "test@example.com",
-                Password = "Test123!",
-                ConfirmPassword = "Test123!"
+                FullName = fullName,
+                Email = email,
+                Password = password,
+                ConfirmPassword = confirmPassword
             };
 
-            // Act
-            var result = await controller.Register(model);
-
-            // Assert
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
-            Assert.Equal("Home", redirectResult.ControllerName);
-        }
-
-        [Fact]
-        public async Task Register_POST_With_Invalid_Model_Returns_View()
-        {
-            // Arrange
-            var testUsers = new List<User>().AsQueryable();
-            var realUserManager = new TestUserManager(testUsers);
-            var mockSignInManager = GetMockSignInManager(realUserManager);
-            var mockDbContext = GetMockDbContext();
-
-            var controller = new AccountController(realUserManager, mockSignInManager, mockDbContext);
-            var model = new RegisterViewModel
+            if (!shouldSucceed)
             {
-                FullName = "", // Invalid - required field
-                Email = "invalid-email", // Invalid email format
-                Password = "123", // Too short
-                ConfirmPassword = "456" // Doesn't match
-            };
-
-            controller.ModelState.AddModelError("", "Test error");
+                controller.ModelState.AddModelError("", "Test error");
+            }
 
             // Act
             var result = await controller.Register(model);
 
             // Assert
-            var viewResult = Assert.IsType<ViewResult>(result);
-            Assert.Equal(model, viewResult.Model);
+            if (shouldSucceed)
+            {
+                var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+                Assert.Equal("Index", redirectResult.ActionName);
+                Assert.Equal("Home", redirectResult.ControllerName);
+            }
+            else
+            {
+                var viewResult = Assert.IsType<ViewResult>(result);
+                Assert.Equal(model, viewResult.Model);
+                Assert.True(controller.ModelState.ErrorCount > 0);
+            }
         }
 
         [Fact]
-        public void Login_GET_Returns_View()
+        public void Login_GET_Users()
         {
             // Arrange
             var testUsers = new List<User>().AsQueryable();
@@ -199,24 +190,30 @@ namespace StudyHelper.Tests
             Assert.IsType<ViewResult>(result);
         }
 
-        [Fact]
-        public async Task Login_POST_With_Valid_Credentials_Redirects_To_Home()
+        [Theory]
+        [InlineData("test@example.com", "Test123!", true, true)] // Valid credentials
+        [InlineData("test@example.com", "WrongPassword", true, false)] // Wrong password
+        [InlineData("nonexistent@example.com", "Test123!", false, false)] // Nonexistent user
+        [InlineData("invalid-email", "Test123!", false, false)] // Invalid email format
+        public async Task Login_POST_Users(string email, string password, bool userExists, bool shouldSucceed)
         {
             // Arrange
-            var testUsers = new List<User>
-            {
-                new User { Id = "1", UserName = "test@example.com", Email = "test@example.com", FullName = "Test User" }
-            }.AsQueryable();
-            
+            var testUsers = userExists 
+                ? new List<User>
+                {
+                    new User { Id = "1", UserName = "test@example.com", Email = "test@example.com", FullName = "Test User" }
+                }.AsQueryable()
+                : new List<User>().AsQueryable();
+
             var realUserManager = new TestUserManager(testUsers);
-            var mockSignInManager = GetMockSignInManager(realUserManager, shouldSucceed: true);
+            var mockSignInManager = GetMockSignInManager(realUserManager, shouldSucceed);
             var mockDbContext = GetMockDbContext();
 
             var controller = new AccountController(realUserManager, mockSignInManager, mockDbContext);
             var model = new LoginViewModel
             {
-                Email = "test@example.com",
-                Password = "Test123!",
+                Email = email,
+                Password = password,
                 RememberMe = false
             };
 
@@ -224,39 +221,22 @@ namespace StudyHelper.Tests
             var result = await controller.Login(model);
 
             // Assert
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
-            Assert.Equal("Home", redirectResult.ControllerName);
-        }
-
-        [Fact]
-        public async Task Login_POST_With_Invalid_Credentials_Returns_View_With_Error()
-        {
-            // Arrange
-            var testUsers = new List<User>().AsQueryable();
-            var realUserManager = new TestUserManager(testUsers);
-            var mockSignInManager = GetMockSignInManager(realUserManager, shouldSucceed: false);
-            var mockDbContext = GetMockDbContext();
-
-            var controller = new AccountController(realUserManager, mockSignInManager, mockDbContext);
-            var model = new LoginViewModel
+            if (shouldSucceed)
             {
-                Email = "nonexistent@example.com",
-                Password = "WrongPassword",
-                RememberMe = false
-            };
-
-            // Act
-            var result = await controller.Login(model);
-
-            // Assert
-            var viewResult = Assert.IsType<ViewResult>(result);
-            Assert.Equal(model, viewResult.Model);
-            Assert.True(controller.ModelState.ErrorCount > 0);
+                var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+                Assert.Equal("Index", redirectResult.ActionName);
+                Assert.Equal("Home", redirectResult.ControllerName);
+            }
+            else
+            {
+                var viewResult = Assert.IsType<ViewResult>(result);
+                Assert.Equal(model, viewResult.Model);
+                Assert.True(controller.ModelState.ErrorCount > 0);
+            }
         }
 
         [Fact]
-        public async Task Logout_Redirects_To_Login()
+        public async Task Logout_Users()
         {
             // Arrange
             var testUsers = new List<User>().AsQueryable();
