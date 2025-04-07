@@ -195,5 +195,223 @@ namespace StudyHelper.Tests
             Assert.Null(model.Author);
             Assert.True(model.Deadline > DateTime.Now);
         }
+
+        [Theory]
+        [InlineData(1, true)] // Valid task ID and authenticated user
+        [InlineData(999, false)] // Invalid task ID
+        [InlineData(1, false, "2")] // Valid task ID but different user
+        public async Task Edit_GET_Task(int taskId, bool shouldSucceed, string userId = "1")
+        {
+            // Arrange
+            var mockUserManager = GetMockUserManager();
+            var testUser = new User { Id = userId, UserName = "test@example.com" };
+            
+            mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+                .ReturnsAsync(testUser);
+
+            var testTasks = new List<TaskModel>
+            {
+                new TaskModel 
+                { 
+                    Id = 1, 
+                    Title = "Test Task 1", 
+                    Description = "Test Description 1",
+                    UserId = "1",
+                    Author = "test@example.com",
+                    Deadline = DateTime.Now.AddDays(1),
+                    IsCompleted = false
+                }
+            };
+
+            using var context = GetMockDbContext($"EditGetTestDb_{taskId}_{userId}", testTasks);
+            var controller = new TaskController(context, mockUserManager.Object);
+            controller.ControllerContext = GetMockControllerContext(userId);
+
+            // Act
+            var result = await controller.Edit(taskId);
+
+            // Assert
+            if (shouldSucceed)
+            {
+                var viewResult = Assert.IsType<ViewResult>(result);
+                var model = Assert.IsType<TaskModel>(viewResult.Model);
+                Assert.Equal(taskId, model.Id);
+                Assert.Equal("Test Task 1", model.Title);
+                Assert.Equal("Test Description 1", model.Description);
+                Assert.False(model.IsCompleted);
+            }
+            else
+            {
+                Assert.IsType<NotFoundResult>(result);
+            }
+        }
+
+        [Theory]
+        [InlineData(1, true)] // Valid task update
+        [InlineData(999, false)] // Invalid task ID
+        [InlineData(1, false, "2")] // Valid task ID but different user
+        public async Task Edit_POST_Task(int taskId, bool shouldSucceed, string userId = "1")
+        {
+            // Arrange
+            var mockUserManager = GetMockUserManager();
+            var testUser = new User { Id = userId, UserName = "test@example.com" };
+            
+            mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+                .ReturnsAsync(testUser);
+
+            var testTasks = new List<TaskModel>
+            {
+                new TaskModel 
+                { 
+                    Id = 1, 
+                    Title = "Test Task 1", 
+                    Description = "Test Description 1",
+                    UserId = "1",
+                    Author = "test@example.com",
+                    Deadline = DateTime.Now.AddDays(1),
+                    IsCompleted = false
+                }
+            };
+
+            using var context = GetMockDbContext($"EditPostTestDb_{taskId}_{userId}", testTasks);
+            var controller = new TaskController(context, mockUserManager.Object);
+            controller.ControllerContext = GetMockControllerContext(userId);
+
+            var updatedTask = new TaskModel
+            {
+                Id = taskId,
+                Title = "Updated Title",
+                Description = "Updated Description",
+                Deadline = DateTime.Now.AddDays(2),
+                IsCompleted = true,
+                UserId = userId
+            };
+
+            // Act
+            var result = await controller.Edit(taskId, updatedTask);
+
+            // Assert
+            if (shouldSucceed)
+            {
+                var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+                Assert.Equal("Index", redirectResult.ActionName);
+
+                // Verify the task was updated
+                var task = await context.Tasks.FindAsync(taskId);
+                Assert.NotNull(task);
+                Assert.Equal("Updated Title", task.Title);
+                Assert.Equal("Updated Description", task.Description);
+                Assert.True(task.IsCompleted);
+                Assert.Equal(DateTime.Now.AddDays(2).Date, task.Deadline.Date);
+            }
+            else
+            {
+                Assert.IsType<NotFoundResult>(result);
+            }
+        }
+
+        [Theory]
+        [InlineData(1, true)] // Valid task deletion
+        [InlineData(999, false)] // Invalid task ID
+        [InlineData(1, false, "2")] // Valid task ID but different user
+        public async Task Delete_POST_Task(int taskId, bool shouldSucceed, string userId = "1")
+        {
+            // Arrange
+            var mockUserManager = GetMockUserManager();
+            var testUser = new User { Id = userId, UserName = "test@example.com" };
+            
+            mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+                .ReturnsAsync(testUser);
+
+            var testTasks = new List<TaskModel>
+            {
+                new TaskModel 
+                { 
+                    Id = 1, 
+                    Title = "Test Task 1", 
+                    Description = "Test Description 1",
+                    UserId = "1",
+                    Author = "test@example.com",
+                    Deadline = DateTime.Now.AddDays(1),
+                    IsCompleted = false
+                }
+            };
+
+            using var context = GetMockDbContext($"DeleteTestDb_{taskId}_{userId}", testTasks);
+            var controller = new TaskController(context, mockUserManager.Object);
+            controller.ControllerContext = GetMockControllerContext(userId);
+
+            // Act
+            var result = await controller.Delete(taskId);
+
+            // Assert
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectResult.ActionName);
+
+            // Verify the task was deleted if it should have been
+            var task = await context.Tasks.FindAsync(taskId);
+            if (shouldSucceed)
+            {
+                Assert.Null(task);
+            }
+            else
+            {
+                Assert.NotNull(task);
+            }
+        }
+
+        [Theory]
+        [InlineData(1, true)] // Valid task completion
+        [InlineData(999, false)] // Invalid task ID
+        [InlineData(1, false, "2")] // Valid task ID but different user
+        public async Task MarkCompleted_POST_Task(int taskId, bool shouldSucceed, string userId = "1")
+        {
+            // Arrange
+            var mockUserManager = GetMockUserManager();
+            var testUser = new User { Id = userId, UserName = "test@example.com" };
+            
+            mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+                .ReturnsAsync(testUser);
+
+            var testTasks = new List<TaskModel>
+            {
+                new TaskModel 
+                { 
+                    Id = 1, 
+                    Title = "Test Task 1", 
+                    Description = "Test Description 1",
+                    UserId = "1",
+                    Author = "test@example.com",
+                    Deadline = DateTime.Now.AddDays(1),
+                    IsCompleted = false
+                }
+            };
+
+            using var context = GetMockDbContext($"MarkCompletedTestDb_{taskId}_{userId}", testTasks);
+            var controller = new TaskController(context, mockUserManager.Object);
+            controller.ControllerContext = GetMockControllerContext(userId);
+
+            // Act
+            var result = await controller.MarkCompleted(taskId);
+
+            // Assert
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectResult.ActionName);
+
+            // Verify the task completion status
+            var task = await context.Tasks.FindAsync(taskId);
+            if (shouldSucceed)
+            {
+                Assert.NotNull(task);
+                Assert.True(task.IsCompleted);
+            }
+            else
+            {
+                if (task != null)
+                {
+                    Assert.False(task.IsCompleted);
+                }
+            }
+        }
     }
 }
