@@ -58,8 +58,7 @@ coverage/
 # Compiled Razor views
 **/obj/**/Razor/
 
-# wwwroot auto-generated content
-wwwroot/lib/
+
 wwwroot/dist/
 wwwroot/node_modules/
 
