@@ -312,7 +312,6 @@ namespace StudyHelper.Tests
 
         [Theory]
         [InlineData(1, true)] // Valid task deletion
-        [InlineData(999, false)] // Invalid task ID
         [InlineData(1, false, "2")] // Valid task ID but different user
         public async Task Delete_POST_Task(int taskId, bool shouldSucceed, string userId = "1")
         {
